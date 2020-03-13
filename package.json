@@ -1,0 +1,44 @@
+{
+  "name": "test-vuetify",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "test:unit": "vue-cli-service test:unit"
+  },
+  "dependencies": {
+    "@statnett/vue-plotly": "^0.3.2",
+    "axios": "^0.19.0",
+    "core-js": "^2.6.5",
+    "plotly.js": "^1.49.4",
+    "plotly.js-dist": "^1.52.3",
+    "sinon": "^8.1.1",
+    "vue": "^2.6.10",
+    "vue-class-component": "^7.0.2",
+    "vue-json-csv": "^1.2.8",
+    "vue-moment": "^4.0.0",
+    "vue-property-decorator": "^8.1.0",
+    "vue-router": "^3.0.3",
+    "vuetify": "^2.0.0",
+    "vuex": "^3.0.1"
+  },
+  "devDependencies": {
+    "@mdi/font": "^4.2.95",
+    "@types/jest": "^24.0.19",
+    "@vue/cli-plugin-babel": "^3.11.0",
+    "@vue/cli-plugin-typescript": "^3.11.0",
+    "@vue/cli-plugin-unit-jest": "^4.2.2",
+    "@vue/cli-service": "^3.11.0",
+    "@vue/test-utils": "1.0.0-beta.31",
+    "canvas": "^2.6.1",
+    "jest-canvas-mock": "^2.2.0",
+    "sass": "^1.18.0",
+    "sass-loader": "^7.1.0",
+    "typescript": "^3.4.3",
+    "vue-cli-plugin-vuetify": "^0.6.3",
+    "vue-template-compiler": "^2.6.10",
+    "vuetify-loader": "^1.2.2"
+  }
+}
