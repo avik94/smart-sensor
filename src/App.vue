@@ -9,7 +9,7 @@
         ></v-img>
       </div>
       <v-list height="5" shaped dense nav>
-        <v-list-item v-for="item in items" :key="item.title" :to="item.url" color="white">
+        <v-list-item v-for="item in items" :key="item.title" :to="item.url" color="white" @click = "clickMachineItem(item.title, item.id)">
           <v-list-item-icon>
             <v-icon v-bind:style="{ color: item.status  }">{{ item.icon }}</v-icon>
           </v-list-item-icon>
@@ -63,23 +63,31 @@ export default class App extends Vue {
   }
 
   async created(){
-    console.log(this.$route.params.companyId)
-    let x = await axios.get('https://crystalball-powerviz.machinesense.com/fetchMachines?id='+this.$route.params.companyId);
-    // console.log(x);
-    let machineList = [];
-    for (let i of x.data){
-      if(i.machines.length != 0){ 
-        for(let machineData of i.machines){
-          let statusRes = await axios.get('https://crystalball-powerviz.machinesense.com/getStatus?id='+machineData.id);
-          console.log(machineData.name);
-          console.log(machineData.id);
-          
-          machineList.push({ title: machineData.name, icon: "mdi-adjust", url: "/"+machineData.name+"/"+machineData.id, status: statusRes.data.color });
-        } 
-      }
-    }
+    console.log(this.$route.params.companyId);
+    localStorage.removeItem("companyName");
+    localStorage.setItem("companyName", this.$route.params.companyId)
+    let x = await axios.post('https://crystalball-powerviz.machinesense.com:3443/api/analytics/get_machine/123-567-8910',
+    {
+	    "Company name": this.$route.params.companyId
+    });
+    console.log(x.data);
+    let machineList:any = [];
+    x.data.machine_list.forEach((i:any, indexMachine:any)=>{
+      console.log(i)
+      i.forEach((item:any, index:any)=>{
+        console.log(item)
+        machineList.push({ title: item, icon: "mdi-adjust", url: "/machine-data/"+ index, status: 'green'});
+      });
+    });
     this.items = machineList
-    console.log(machineList)
+    // console.log(machineList)
+  }
+
+  clickMachineItem(name:any, id:any) {
+    localStorage.removeItem('machineName');
+    // localStorage.removeItem('machineId');
+    localStorage.setItem('machineName', name);
+    // localStorage.setItem('machineId', id);
   }
 }
 </script>

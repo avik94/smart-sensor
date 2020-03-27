@@ -4,13 +4,15 @@
     <div class="text-center" v-if="loader">
       <v-progress-circular :size="50" :width="2" color="purple" indeterminate></v-progress-circular>
     </div>
-    <div v-if="noData">
+    <div v-if="noData" class="text-center">
       <p>No Data Found</p>
     </div>
     <!-- view div -->
     <div v-if="view">
+      <!-- <p>{{myProps}}</p> -->
       <div style="border: 1px solid green;">
-        <vue-plotly  :data="linedata.data" :layout="linedata.layout" :options="linedata.options" />
+        <!-- <vue-plotly :data="linedata.data" :layout="linedata.layout" :options="linedata.options" /> -->
+        <div id="plotLine1"></div>
       </div>
     </div>
   </v-container>
@@ -20,14 +22,15 @@
 import Vue from "vue";
 import axios from "axios";
 //@ts-ignore
-import VuePlotly from "@statnett/vue-plotly";
+// import VuePlotly from "@statnett/vue-plotly";
+import Plotly from 'plotly.js-dist';
 import { Component, Prop, Watch } from "vue-property-decorator";
 @Component({
-  components: {
-    VuePlotly
-  }
+  // components: {
+  //   VuePlotly
+  // }
 })
-export default class MaxLine extends Vue {
+export default class LinePlot extends Vue {
   // @ts-ignore
   @Prop() myProps;
 
@@ -36,21 +39,20 @@ export default class MaxLine extends Vue {
 
   @Watch("barClick",  { deep: true })
   barClickValue(){
-    /* plot responsiveness */
+    console.log(this.barClick);
     if(this.barClick === 0){
       this.linedata.layout.width = window.innerWidth-320;
+      console.log(window.innerWidth)
     }else{
       this.linedata.layout.width = window.innerWidth-220;
+      console.log(window.innerWidth)
     }
-    /* plot responsiveness */
+    console.log(this.linedata.layout)
+    Plotly.newPlot('plotLine1', this.linedata.data, this.linedata.layout, this.linedata.options);
   }
 
   @Watch("myProps", { deep: true })
   async myPropsChanged() {
-    this.view = false;
-    this.noData = false;
-    this.loader = true;
-    /* plot responsiveness */
     if(this.barClick){
       if(this.barClick === 0){
         this.linedata.layout.width = window.innerWidth-320;
@@ -60,55 +62,50 @@ export default class MaxLine extends Vue {
     }else{
       this.linedata.layout.width = window.innerWidth-320;
     }
-    /* plot responsiveness */
-    await this.processData();
-    
+    console.log("coming to props");
+    this.view = false;
+    this.noData = false;
+    this.loader = true;
+    this.linedata.data = [];
+    await this.preocessData();
+    let dummy = []
+    let xDummy = []
+    for(let i of this.linedata.data[0].x){
+      dummy.push("");
+      xDummy.push(i)
+    }
+    this.linedata.data.push({
+      x: xDummy,
+      y: dummy,
+      type: "line",
+      showlegend: false,
+      name: "test"
+    })
+    // console.log(this.linedata.data);
+    // console.log(this.linedata.data[3]);
+    // let x = this.linedata.layout
+    Plotly.react('plotLine1', this.linedata.data,this.linedata.layout, this.linedata.options);
   }
 
-  linedata = {
+  linedata:any = {
     data: [
-      {
-        x: [],
-        y: [],
-        type: "line",
-        name: "",
-        line: {
-          color: '#fb7c00'
-        }
-      },
-      {
-        x: [],
-        y: [],
-        type: "line",
-        name: "",
-        line: {
-          color: 'green'
-        }
-      },
-      {
-        x: [],
-        y: [],
-        type: "line",
-        name: "",
-        line: {
-          color: '#122091'
-        }
-      }
     ],
     layout: {
-      autosize: true,
-      width: 1080,
+      autosize: false,
+      width: 1010,
       height: 450,
       title: {
         text: "Plot Title",
         font: {
           family: "Courier New, monospace",
-          size: 17
+          size: 17,
+          align: 'center'
         },
         xref: "paper",
         x: 0.05
       },
       yaxis: {
+        tickangle: 30,
         title: {
           text: "Y Axis",
           font: {
@@ -122,12 +119,12 @@ export default class MaxLine extends Vue {
     options: {}
   };
   // line-plot end
+
   view = false;
   noData = false;
   loader = true;
 
-  async created() {
-    /* plot responsiveness */
+  async mounted() {
     if(this.barClick){
       if(this.barClick === 0){
         this.linedata.layout.width = window.innerWidth-320;
@@ -137,12 +134,27 @@ export default class MaxLine extends Vue {
     }else{
       this.linedata.layout.width = window.innerWidth-320;
     }
-    /* plot responsiveness */
-    await this.processData();
+    console.log("coming to created");
+    await this.preocessData();
+    let dummy = []
+    let xDummy = []
+    for(let i of this.linedata.data[0].x){
+      dummy.push("");
+      xDummy.push(i)
+    }
+    this.linedata.data.push({
+      x: xDummy,
+      y: dummy,
+      type: "line",
+      showlegend: false,
+      name: "test"
+    })
+    console.log(this.linedata.data);
+    Plotly.newPlot('plotLine1', this.linedata.data, this.linedata.layout, this.linedata.options);
+    
   }
 
-/* Function for process the entire data*/
-  async processData(){
+  async preocessData(){
     if (this.myProps.quickTime) {
       console.log("work for quick time");
       let startTime: any;
@@ -166,8 +178,9 @@ export default class MaxLine extends Vue {
       const apiEndTime = Math.floor(date.getTime());
       // console.log("End Time : "+apiEndTime);
       let data = {
+        "Company name": this.myProps.company,
         "Machine name": this.myProps.machine,
-        "Stat name": this.myProps.stat,
+        "Sensor name": this.myProps.stat,
         "Start time": apiStartTime.toString(),
         "End time": apiEndTime.toString(),
         "Time format": this.myProps.timeZone
@@ -175,47 +188,43 @@ export default class MaxLine extends Vue {
       console.log(data);
       // @ts-ignore
       let responseData = await axios.post(
-        this.$store.state.baseUrl+":3443/api/analytics/normal_data/123-567-8910",
+        this.$store.state.baseUrl+":3443/api/analytics/expert_sensor/123-567-8910",
         data
       );
-      // console.log(responseData.data["Max Plot"]);
+      console.log(responseData.data["Max Plot"])
+      // console.log(responseData.data["Line PLot"]["Stat"]);
       // work for no data found
-      if(responseData.data["Max Plot"] === "No Data Found"){
+      if (responseData.data["Max Plot"] === "No Data Found") {
         this.noData = true;
         this.loader = false;
         this.view = false;
-      }else {
-        this.linedata.data[0].name = responseData.data["Max Plot"].Stat[0];
-        this.linedata.data[1].name = responseData.data["Max Plot"].Stat[1];
-        this.linedata.data[2].name = responseData.data["Max Plot"].Stat[2];
-
+      } else {
+        console.log(responseData.data["Max Plot"]["Stat"])
         this.linedata.layout.title.text = responseData.data["Max Plot"].Title[0];
         this.linedata.layout.yaxis.title = responseData.data["Max Plot"].Unit[0];
-        // console.log(responseData.data["Max Plot"].Value)
-        let xAxis: any = [];
-        let firstYaxis: any = [];
-        let seccondYaxis: any = [];
-        let thirdYaxis: any = [];
-        for (let item of responseData.data["Max Plot"].Value) {
-          xAxis.push(item[0]);
-          firstYaxis.push(item[1]);
-          seccondYaxis.push(item[2]);
-          thirdYaxis.push(item[3]);
-        }
-        this.linedata.data[0].x = xAxis;
-        this.linedata.data[1].x = xAxis;
-        this.linedata.data[2].x = xAxis;
-        this.linedata.data[0].y = firstYaxis;
-        this.linedata.data[1].y = seccondYaxis;
-        this.linedata.data[2].y = thirdYaxis;
+        responseData.data["Max Plot"]["Stat"].forEach((itemStat:any,indexStat:any)=>{
+          let xAxis:any = [];
+          let yAxis:any = [];
+          responseData.data["Max Plot"]["Value"].forEach((item:any, index:any)=>{
+            xAxis.push(item[0])
+            yAxis.push(item[indexStat+1])
+          })
+          const data:any = {
+            x: xAxis,
+            y: yAxis,
+            type: "line",
+            showlegend: true,
+            name: itemStat,
+          }
+          this.linedata.data.push(data);
+        });
         this.view = true;
         this.loader = false;
         this.noData = false;
       }
 
       // no data found end
-      
-    } else{
+    } else {
       console.log("work for customize time");
       const dateStart = new Date(
         this.myProps.fromDate + " " + this.myProps.fromHourMinutes
@@ -226,51 +235,48 @@ export default class MaxLine extends Vue {
       );
       const apiEndTime = Math.floor(endStart.getTime());
       let data = {
-        "Machine name": this.myProps.machine,
-        "Stat name": this.myProps.stat,
-        "Start time": apiStartTime.toString(),
-        "End time": apiEndTime.toString(),
-        "Time format": this.myProps.timeZone
+      "Company name": this.myProps.company,
+      "Machine name": this.myProps.machine,
+      "Sensor name": this.myProps.stat,
+      "Start time": apiStartTime.toString(),
+      "End time": apiEndTime.toString(),
+      "Time format": this.myProps.timeZone
       };
       console.log(data);
       // @ts-ignore
       let responseData = await axios.post(
-        this.$store.state.baseUrl+":3443/api/analytics/normal_data/123-567-8910",
+        this.$store.state.baseUrl+":3443/api/analytics/expert_sensor/123-567-8910",
         data
       );
       // work for no data found
-      if(responseData.data["Max Plot"] === "No Data Found"){
+      if (responseData.data["Max Plot"] === "No Data Found") {
         this.noData = true;
         this.loader = false;
         this.view = false;
-      }else{
-        // console.log(responseData.data["Max Plot"].Stat[0]);
-        this.linedata.data[0].name = responseData.data["Max Plot"].Stat[0];
-        this.linedata.data[1].name = responseData.data["Max Plot"].Stat[1];
-        this.linedata.data[2].name = responseData.data["Max Plot"].Stat[2];
+      } else {
+        console.log(responseData.data["Max Plot"]["Stat"])
         this.linedata.layout.title.text = responseData.data["Max Plot"].Title[0];
         this.linedata.layout.yaxis.title = responseData.data["Max Plot"].Unit[0];
-        // console.log(responseData.data["Max Plot"].Value)
-        let xAxis: any = [];
-        let firstYaxis: any = [];
-        let seccondYaxis: any = [];
-        let thirdYaxis: any = [];
-        for (let item of responseData.data["Max Plot"].Value) {
-          xAxis.push(item[0]);
-          firstYaxis.push(item[1]);
-          seccondYaxis.push(item[2]);
-          thirdYaxis.push(item[3]);
-        }
-        this.linedata.data[0].x = xAxis;
-        this.linedata.data[1].x = xAxis;
-        this.linedata.data[2].x = xAxis;
-        this.linedata.data[0].y = firstYaxis;
-        this.linedata.data[1].y = seccondYaxis;
-        this.linedata.data[2].y = thirdYaxis;
+        responseData.data["Max Plot"]["Stat"].forEach((itemStat:any,indexStat:any)=>{
+          let xAxis:any = [];
+          let yAxis:any = [];
+          responseData.data["Max Plot"]["Value"].forEach((item:any, index:any)=>{
+            xAxis.push(item[0])
+            yAxis.push(item[indexStat+1])
+          })
+          const data:any = {
+            x: xAxis,
+            y: yAxis,
+            type: "line",
+            showlegend: true,
+            name: itemStat,
+          }
+          this.linedata.data.push(data);
+        });
         this.view = true;
         this.loader = false;
         this.noData = false;
-        }
+      }
 
       //wok for no data end
     }

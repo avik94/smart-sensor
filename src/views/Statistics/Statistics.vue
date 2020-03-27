@@ -5,15 +5,23 @@
       <v-col cols="12">
         <!-- machine & stat row start -->
         <v-row>
-          <v-col cols="4">
+          <v-col cols="2">
             <v-select 
               v-bind:disabled = "disabledInput" 
-              :items="statList" 
-              label="Sensors"
+              :items="channelList" 
+              label="Channel"
               item-value="value"
               item-text="name" 
-              v-model="stat"
-              @change="clickStat(stat)"></v-select>
+              v-model="channel"
+              @change="clickChannel(channel)"></v-select>
+          </v-col>
+          <v-col cols="2" v-if="sensor" style="padding-top:20px;">
+            <v-chip class="ma-2" color="teal" text-color="white">
+              <v-avatar left>
+                <v-icon>mdi-checkbox-marked-circle</v-icon>
+              </v-avatar>
+              {{stat}}
+            </v-chip>
           </v-col>
 
           <v-col cols="3">

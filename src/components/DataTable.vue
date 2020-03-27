@@ -39,26 +39,21 @@ export default class DataTable extends Vue {
   @Prop() myProps;
   // Datatable Section
   search = "";
-  headers = [];
-  tableData = [];
+  headers:any = [
+  ];
+  tableData = [
+  ];
   showLoader = false;
-  showTable = false;
+  showTable = true;
+  temp = true;
 
   @Watch("myProps", { deep: true })
   async myPropsChanged(val: any, oldVal: string) {
-    console.log("data table props-lifecycle");
+    console.log("data table created-lifecycle");
     this.showLoader = true;
     this.showTable = false;
 
-    let res = await this.dataFunction(this.myProps);
-    console.log(res);
-    let header: any = [{ text: "Time Stamp", value: "Time Stamp" }];
-    // console.log(res["column name"])
-    for (let item of res["column name"]) {
-      header.push({ text: item, value: item });
-    }
-    this.headers = header;
-    this.tableData = res["data"];
+    await this.processData();
     this.showLoader = false;
     this.showTable = true;
   }
@@ -69,27 +64,16 @@ export default class DataTable extends Vue {
     this.showLoader = true;
     this.showTable = false;
 
-    let res = await this.dataFunction(this.myProps);
-    console.log(res);
-    let header: any = [{ text: "Time Stamp", value: "Time Stamp" }];
-    // console.log(res["column name"])
-    for (let item of res["column name"]) {
-      header.push({ text: item, value: item });
-    }
-    this.headers = header;
-    this.tableData = res["data"];
+    await this.processData();
     this.showLoader = false;
     this.showTable = true;
   }
 
-  // dataFunction(dataPair: any) in use for call api of quicktime & customTime in a single function
-  // @recieve the (myProps data)
-
-  async dataFunction(dataPair: any) {
-    if (dataPair.quickTime) {
+  async processData() {
+    if (this.myProps.quickTime) {
       console.log("work for quick time");
       let startTime: any;
-      let getUnitStr = dataPair.quickTime.split("");
+      let getUnitStr = this.myProps.quickTime.split("");
       let unit = getUnitStr[getUnitStr.length - 1];
       getUnitStr.pop();
       let time = getUnitStr.join("");
@@ -109,41 +93,47 @@ export default class DataTable extends Vue {
       const apiEndTime = Math.floor(date.getTime());
       // console.log("End Time : "+apiEndTime);
       let data = {
-        "Machine name": dataPair.machine,
-        "Stat name": dataPair.stat,
+        "Company name": this.myProps.company,
+        "Machine name": this.myProps.machine,
+        "Sensor name": this.myProps.stat,
         "Start time": apiStartTime.toString(),
         "End time": apiEndTime.toString(),
-        "Time format": dataPair.timeZone
+        "Time format": this.myProps.timeZone
       };
       console.log(data);
       // @ts-ignore
       let responseData = await axios.post(
-        this.$store.state.baseUrl+":3443/api/analytics/data_table/123-567-8910",
+        this.$store.state.baseUrl+":3443/api/analytics/sensor_data_table/123-567-8910",
         data
       );
-      return responseData.data;
+      console.log(responseData.data);
+      this.headers = responseData.data["column name"];
+      this.tableData = responseData.data["data"];
     } else {
       console.log("work for customize time");
       const dateStart = new Date(
-        dataPair.fromDate + " " + dataPair.fromHourMinutes
+        this.myProps.fromDate + " " + this.myProps.fromHourMinutes
       );
       const apiStartTime = Math.floor(dateStart.getTime());
-      const endStart = new Date(dataPair.toDate + " " + dataPair.toHourMinutes);
+      const endStart = new Date(this.myProps.toDate + " " + this.myProps.toHourMinutes);
       const apiEndTime = Math.floor(endStart.getTime());
       let data = {
-        "Machine name": dataPair.machine,
-        "Stat name": dataPair.stat,
+        "Company name": this.myProps.company,
+        "Machine name": this.myProps.machine,
+        "Sensor name": this.myProps.stat,
         "Start time": apiStartTime.toString(),
         "End time": apiEndTime.toString(),
-        "Time format": dataPair.timeZone
+        "Time format": this.myProps.timeZone
       };
       console.log(data);
       // @ts-ignore
       let responseData = await axios.post(
-        this.$store.state.baseUrl+":3443/api/analytics/data_table/123-567-8910",
+        this.$store.state.baseUrl+":3443/api/analytics/sensor_data_table/123-567-8910",
         data
       );
-      return responseData.data;
+      console.log(responseData.data);
+      this.headers = responseData.data["column name"];
+      this.tableData = responseData.data["data"];
     }
   }
 }

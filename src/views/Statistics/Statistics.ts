@@ -36,8 +36,10 @@ export default class Statistics extends Vue {
 
   @Watch('$route', { immediate: true, deep: true })
   async onUrlChange(routeName: any) {
+    this.sensor = false;
     this.fakeDetail = true;
     this.showTab = false;
+    this.channel = "";
     this.stat = "";
     this.threshold = "";
     this.quickTime = "";
@@ -50,10 +52,28 @@ export default class Statistics extends Vue {
     console.log(routeName.params.name);
     if(!routeName.params.name){
       console.log("No changing route")
-    }else{      
-      this.machine = routeName.params.name;
-      console.log("route changing");
-      this.disabledInput = false; 
+    }else{
+      this.disabledInput = true;
+      setTimeout(()=>{
+        this.machine = localStorage.getItem('machineName');
+      },500);
+      setTimeout(async()=>{
+        let x = await axios.post('https://crystalball-powerviz.machinesense.com:3443/api/analytics/get_machine/123-567-8910',
+        {
+          "Company name": localStorage.getItem("companyName")
+        });
+        console.log(this.machine);
+        let name = this.machine;
+        this.channelStore = x.data.machine_sensor_map[this.machine][1];
+        let channelList:any = [];
+        x.data.machine_sensor_map[name][0].forEach((item:any, index:any)=>{
+          channelList.push({name: item, value: index});
+        });
+        this.channelList = channelList;
+        this.disabledInput = false; 
+      },600)
+      console.log("route changing"); 
+      
       // console.log(this.machineId);
     }
   }
@@ -83,14 +103,6 @@ export default class Statistics extends Vue {
   tab: any = 0;
   machineList = [];
 
-  statList:any[] = [
-    { name: "Temperature", value: "Temperature" },
-    { name: "Moisture", value: "Moisture" },
-    { name: "Voltage(L-N)", value: "Voltage(L-N)" },
-    { name: "Current", value: "Current" },
-    { name: "Humidity",value: "Humidity"},
-    { name: "Voltage variation (%)", value: "Voltage variation (%)" }
-  ];
   quicktimeList = [
     {name: "5 Minutes", value: "5m"},{name: "10 Minutes", value: "10m"}, {name: "15 Minutes", value: "15m"}, 
     {name: "30 Minutes", value: "30m"}, {name: "1 Hours", value: "1h"}, {name: "3 Hours", value: "3h"},
@@ -99,20 +111,22 @@ export default class Statistics extends Vue {
   ]
   timeZoneList = ["IST", "UTC", "EST"];
   items = ["Line Plot", "Max", "Min", "Data Table"]; 
+  channelList:any[] = [];
   // tab section end
 
 
   async created() {
-    // let statList = await axios.get('http://52.142.17.219:5000/fetchStats'); 
-    // this.statList = statList.data;
-    // console.log(this.timeZone);
-    this.timeZone = "IST"
-    // console.log("hi")
+    this.companyName = this.$route.params.companyId;
+    this.timeZone = "IST";
   }
   
   // ==========================================
   // dialog form for input start from here
-  machine = "";
+  sensor = false; // for showing hiding sensors 
+  channelStore = "";
+  channel:any = "";
+  companyName:any = "";
+  machine:any = "";
   group = "";
   stat = "";
   threshold:any = "";
@@ -137,13 +151,11 @@ export default class Statistics extends Vue {
 
   dialog = false;
 
-  // number = [
-  //   (v:any) => !!v || 'data is required',
-  // ]
 
   clickTime(){
     // if(this.stat){
       let data = {
+        company: this.companyName,
         machine: this.machine,
         stat: this.stat,
         threshold: this.threshold,
@@ -158,10 +170,12 @@ export default class Statistics extends Vue {
       return 1;
     // }
   }
+
   clickQuickTime(){
     if(this.stat !== ""){
       console.log(this.stat);
       let data = {
+        company: this.companyName,
         machine: this.machine,
         stat: this.stat,
         threshold: this.threshold,
@@ -182,6 +196,7 @@ export default class Statistics extends Vue {
   submitTimeInput(){
     this.dialog = false;
     let data = {
+      company: this.companyName,
       machine: this.machine,
       stat: this.stat,
       threshold: this.threshold,
@@ -214,6 +229,7 @@ export default class Statistics extends Vue {
   clickStat(){
     if(this.quickTime !== "" || this.toDate !== ""){
       let data = {
+        company: this.companyName,
         machine: this.machine,
         stat: this.stat,
         threshold: this.threshold,
@@ -225,6 +241,28 @@ export default class Statistics extends Vue {
         timeZone: this.timeZone
       }
       this.allData = data;
+      this.showTab = true;
+      this.fakeDetail = false;
+    }
+  }
+
+  async clickChannel(dataIndex:any) {
+    this.stat = this.channelStore[dataIndex];
+    this.sensor = true;
+    if(this.quickTime !== "" || this.toDate !== ""){
+      let data = {
+        company: this.companyName,
+        machine: this.machine,
+        stat: this.stat,
+        threshold: this.threshold,
+        quickTime: this.quickTime,
+        fromDate: this.fromDate,
+        fromHourMinutes: this.formHours+":"+this.formMinutes,
+        toDate: this.toDate,
+        toHourMinutes: this.toHours+":"+this.toMinutes,
+        timeZone: this.timeZone
+      }
+      this.allData = data;  
       this.showTab = true;
       this.fakeDetail = false;
     }

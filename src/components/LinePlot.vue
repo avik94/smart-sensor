@@ -48,7 +48,7 @@ export default class LinePlot extends Vue {
       console.log(window.innerWidth)
     }
     console.log(this.linedata.layout)
-    Plotly.react('plotLine', this.linedata.data, this.linedata.layout, this.linedata.options);
+    Plotly.newPlot('plotLine', this.linedata.data, this.linedata.layout, this.linedata.options);
   }
 
   @Watch("myProps", { deep: true })
@@ -89,32 +89,7 @@ export default class LinePlot extends Vue {
 
   linedata:any = {
     data: [
-      // {
-      //   x: [],
-      //   y: [],
-      //   type: "line",
-      //   showlegend: true,
-      //   name: ""
-      // },
-      // {
-      //   x: [],
-      //   y: [],
-      //   type: "line",
-      //   showlegend: true,
-      //   name: "",
-      //   line: {
-      //     color: 'green'
-      //   }
-      // },
-      // {
-      //   x: [],
-      //   y: [],
-      //   type: "line",
-      //   name: "",
-      //   line: {
-      //     color: '#122091'
-      //   }
-      // },
+      
     ],
     layout: {
       autosize: false,
@@ -131,11 +106,14 @@ export default class LinePlot extends Vue {
         x: 0.05
       },
       yaxis: {
+        automargin: true,
+        tickangle: 30,
         title: {
           text: "Y Axis",
+          standoff: 40,
           font: {
             family: "Courier New, monospace",
-            size: 17,
+            size: 1,
             color: "#7f7f7f"
           }
         }
@@ -203,6 +181,7 @@ export default class LinePlot extends Vue {
       const apiEndTime = Math.floor(date.getTime());
       // console.log("End Time : "+apiEndTime);
       let data = {
+        "Company name": this.myProps.company,
         "Machine name": this.myProps.machine,
         "Sensor name": this.myProps.stat,
         "Start time": apiStartTime.toString(),
@@ -215,7 +194,8 @@ export default class LinePlot extends Vue {
         this.$store.state.baseUrl+":3443/api/analytics/expert_sensor/123-567-8910",
         data
       );
-      console.log(responseData.data["Line PLot"]["Stat"]);
+      // console.log(responseData.data["Line Plot"])
+      // console.log(responseData.data["Line PLot"]["Stat"]);
       // work for no data found
       if (responseData.data["Line Plot"] === "No Data Found") {
         this.noData = true;
@@ -257,6 +237,7 @@ export default class LinePlot extends Vue {
       );
       const apiEndTime = Math.floor(endStart.getTime());
       let data = {
+      "Company name": this.myProps.company,
       "Machine name": this.myProps.machine,
       "Sensor name": this.myProps.stat,
       "Start time": apiStartTime.toString(),
