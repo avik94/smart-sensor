@@ -188,7 +188,7 @@ export default class LinePlot extends Vue {
       console.log(data);
       // @ts-ignore
       let responseData = await axios.post(
-        this.$store.state.baseUrl+":3443/api/analytics/expert_sensor/123-567-8910",
+        this.$store.state.baseUrl+":3443/api/analytics/smart_sensor_plot_data_vrf/123-567-8910",
         data
       );
       console.log(responseData.data["Max Plot"])
@@ -245,7 +245,7 @@ export default class LinePlot extends Vue {
       console.log(data);
       // @ts-ignore
       let responseData = await axios.post(
-        this.$store.state.baseUrl+":3443/api/analytics/expert_sensor/123-567-8910",
+        this.$store.state.baseUrl+":3443/api/analytics/smart_sensor_plot_data_vrf/123-567-8910",
         data
       );
       // work for no data found

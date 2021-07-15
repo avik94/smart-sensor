@@ -103,7 +103,7 @@ export default class DataTable extends Vue {
       console.log(data);
       // @ts-ignore
       let responseData = await axios.post(
-        this.$store.state.baseUrl+":3443/api/analytics/sensor_data_table/123-567-8910",
+        this.$store.state.baseUrl+":3443/api/analytics/smart_sensor_data_table_vrf/123-567-8910",
         data
       );
       console.log(responseData.data);
@@ -128,7 +128,7 @@ export default class DataTable extends Vue {
       console.log(data);
       // @ts-ignore
       let responseData = await axios.post(
-        this.$store.state.baseUrl+":3443/api/analytics/sensor_data_table/123-567-8910",
+        this.$store.state.baseUrl+":3443/api/analytics/smart_sensor_data_table_vrf/123-567-8910",
         data
       );
       console.log(responseData.data);

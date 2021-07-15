@@ -49,7 +49,7 @@ export default class Statistics extends Vue {
     this.fromHourMinutes = "";
     // this.timeZone = "";
 
-    console.log(routeName.params.name);
+    console.log(localStorage.getItem("companyName"));
     if(!routeName.params.name){
       console.log("No changing route")
     }else{
@@ -58,7 +58,7 @@ export default class Statistics extends Vue {
         this.machine = localStorage.getItem('machineName');
       },500);
       setTimeout(async()=>{
-        let x = await axios.post('https://crystalball-powerviz.machinesense.com:3443/api/analytics/get_machine/123-567-8910',
+        let x = await axios.post('https://expertviz-vrf.machinesense.com:3443/api/analytics/smart_sensor_machines_vrf/123-567-8910',
         {
           "Company name": localStorage.getItem("companyName")
         });

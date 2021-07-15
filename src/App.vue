@@ -66,11 +66,13 @@ export default class App extends Vue {
     console.log(this.$route.params.companyId);
     localStorage.removeItem("companyName");
     localStorage.setItem("companyName", this.$route.params.companyId)
-    let x = await axios.post('https://crystalball-powerviz.machinesense.com:3443/api/analytics/get_machine/123-567-8910',
+    console.log("hi")
+    let x = await axios.post("https://expertviz-vrf.machinesense.com:3443/api/analytics/smart_sensor_machines_vrf/123-567-8910",
     {
-	    "Company name": this.$route.params.companyId
+    "Company name": "vrftest"
     });
-    console.log(x.data);
+    console.log("hi")
+    console.log(x);
     let machineList:any = [];
     x.data.machine_list.forEach((i:any, indexMachine:any)=>{
       console.log(i)
@@ -80,7 +82,7 @@ export default class App extends Vue {
       });
     });
     this.items = machineList
-    // console.log(machineList)
+    console.log(machineList)
   }
 
   clickMachineItem(name:any, id:any) {
